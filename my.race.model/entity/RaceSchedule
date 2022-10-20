@@ -1,0 +1,9 @@
+namespace mj.model {
+    public class RaceSchedule
+    {
+        public string Location {get; set;} = string.Empty;
+        public DateTime RaceDate { get; set; }
+        public int RaceNumber {get; set;}
+        public string ScheduleStatus {get; set;} = "예정"; // 종료
+    }
+}
