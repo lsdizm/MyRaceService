@@ -2,6 +2,7 @@
     1. centos 로 cloud 서버 재생성
        - 1대만 생성
        - jenkins 설치
+       
     
     2. 데이터 지속 적재
     3. 데이터 분석 툴 / WEB APP / vuejs
