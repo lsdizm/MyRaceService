@@ -2,23 +2,27 @@
     1. centos 로 cloud 서버 재생성
        - 1대만 생성
        - jenkins 설치
-       
-    
     2. 데이터 지속 적재
     3. 데이터 분석 툴 / WEB APP / vuejs
        - 업데이트 worker
 
-
 [환경설정]
-     node 설치
-     dotnet core 6.0 설치 (dotnet-sdk-6.0.302-win-x64)
-
+     1. vscode  설치
+     2. git 설치
+     3. dotnet core 6.0 설치 (dotnet-sdk-6.0.302-win-x64)
+     4. my.race.api 에서 dotnet restore
+     5. my.race.worker 에서 dotnet restore
+     6. 참조 경로 (restore)
+          - dotnet add package Dapper
+          - dotnet add package Mysql.Data
+          - dotnet add package Newtonsoft.Json
+          - dotnet add package Microsoft.Extensions.Logging
+          - add reference ../my.race.model/my.race.model.csproj
 
 [서버 방화벽 오픈 - 오라클 리눅스 (centos)]
      sudo systemctl firewalld stop
      sudo vi /etc/firewalld/zones/public.xml
      sudo systemctl firewalld start
-
 
 [서버 배포 - 서비스 재확인]
      serverice 만들어서 실행
@@ -36,13 +40,6 @@
 [개발 완료후 배포 패키지 준비]
      sudo dotnet publish -c Release -o ../mj.publish 
      -- 이후 push 한다음 서버에서 받아서 서비스 재시작
-
-[개발시 참조 추가]
-     sudo dotnet add package Dapper
-     sudo dotnet add package Mysql.Data
-     sudo dotnet add package Newtonsoft.Json
-     sudo dotnet add package Microsoft.Extensions.Logging
-     dotnet add reference ../my.race.model/my.race.model.csproj
 
 [기능 동작]
     - RaceResult 에 결과 업로드
