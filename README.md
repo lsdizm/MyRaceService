@@ -9,7 +9,7 @@
 [환경설정]
      1. vscode  설치
      2. git 설치
-     3. dotnet core 6.0 설치 (dotnet-sdk-6.0.302-win-x64)
+     3. dotnet core 6.0 설치 (dotnet-sdk-6.0.402-win-x64)
      4. my.race.api 에서 dotnet restore
      5. my.race.worker 에서 dotnet restore
      6. 참조 경로 (restore)
