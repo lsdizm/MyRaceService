@@ -58,10 +58,17 @@ public class MigrateController : ControllerBase
         return Ok(result);
     }
 
-        [HttpGet("migrate/horse")]
+    [HttpGet("migrate/horse")]
     public IActionResult GetHorse([FromQuery]string keyword)
     {
         //var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
         return Ok(true);
+    }
+
+    [HttpGet("data-test")]
+    public async Task<IActionResult> GetDataTest([FromQuery]string keyword)
+    {
+        var result = await _dataapi.GetDataTest(keyword).ConfigureAwait(false);
+        return Ok(result);
     }
 }
