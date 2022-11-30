@@ -1,4 +1,8 @@
 [TO-DO]
+    2022-11-28
+       - DATA 체크 API 만들기
+       - DB Data로 관리
+
     1. centos 로 cloud 서버 재생성
        - 1대만 생성
        - jenkins 설치

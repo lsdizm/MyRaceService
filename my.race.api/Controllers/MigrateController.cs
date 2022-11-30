@@ -10,15 +10,57 @@ public class MigrateController : ControllerBase
 {
     private readonly IDataBases _databases;
     private readonly IDataAPI _dataapi;
+    private readonly IConfigurations _configurations;
     private readonly ILogger<QueryController> _logger;
     public MigrateController(IDataBases databases,
         IDataAPI dataapi,
+        IConfigurations configurations,
         ILogger<QueryController> logger)
     {
+        _configurations = configurations;
         _databases = databases;
         _dataapi = dataapi;
         _logger = logger;
     }    
+
+    [HttpGet("api-information")]
+    public async Task<IActionResult> GetApiInformation([FromQuery]string id)
+    {
+        var result = await _databases.SelectApiInformation(id).ConfigureAwait(false);
+
+        if (result != null)
+        {
+
+        }
+        return Ok(result);
+    }
+
+    [HttpGet("data-api-test")]
+    public async Task<IActionResult> TestApi([FromQuery]string id, [FromQuery] List<string> parameters)
+    {
+        var result = await _databases.SelectApiInformation(id).ConfigureAwait(false);
+        
+        if (result != null)
+        {
+            var serviceKey = _configurations.GetMyRaceEnvironment("API-SERVICE-KEY");        
+            var _parameters = result.MakeParameters(parameters);
+            var apiResult = await  _dataapi.GetFromAPI<dynamic>(result.UrlAddress, _parameters).ConfigureAwait(false);
+            return Ok(apiResult);            
+        }
+        else 
+        {
+            return BadRequest();
+        }
+
+
+    }
+
+    [HttpGet("configurations")]
+    public IActionResult GetConfiguration([FromQuery]string itemCode)
+    {
+        var result = _configurations.GetMyRaceEnvironment(itemCode);
+        return Ok(result);
+    }
 
     [HttpPost("execute/race-results")]
     public async Task<IActionResult> MigrateRaceResult([FromQuery]DateTime? fromDate, [FromQuery]DateTime? toDate)
@@ -58,7 +100,7 @@ public class MigrateController : ControllerBase
         return Ok(result);
     }
 
-        [HttpGet("migrate/horse")]
+    [HttpGet("migrate/horse")]
     public IActionResult GetHorse([FromQuery]string keyword)
     {
         //var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);

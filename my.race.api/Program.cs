@@ -17,6 +17,8 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     });
 });
 
+builder.Services.AddSingleton<IConfigurations, Configurations>();
+builder.Services.AddSingleton<IDataBases, DataBases>();
 builder.Services.AddScoped<IDataBases, DataBases>();
 builder.Services.AddScoped<IDataAPI, DataAPI>();
 

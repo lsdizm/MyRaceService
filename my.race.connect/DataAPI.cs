@@ -6,7 +6,8 @@ using System.Text.Json.Serialization;
 using my.race.model;
 using Microsoft.Extensions.Logging;
 
-namespace my.race.connect {
+namespace my.race.connect 
+{
     public class DataAPI : IDataAPI
     {
         private readonly ILogger<DataAPI> _logger;
@@ -26,13 +27,12 @@ namespace my.race.connect {
             return client;
         }
 
-        private async Task<List<T>> GetFromAPI<T>(string path, Dictionary<string, string> parameters) where T : class
+        public async Task<List<T>> GetFromAPI<T>(string path, Dictionary<string, string> parameters) where T : class
         {
             var result = new List<T>();
             var pageNo = 1;
-            var numOfRows = 10;
-
-            parameters.TryAdd("pageNo", "1");
+            var numOfRows = 100;
+            parameters.TryAdd("pageNo", pageNo.ToString());
             parameters.TryAdd("numOfRows", numOfRows.ToString());
             parameters.TryAdd("serviceKey", serviceKey);
 
@@ -42,6 +42,8 @@ namespace my.race.connect {
                 {
                     try
                     {
+                        parameters["pageNo"] = pageNo.ToString();
+
                         var queryString = string.Join("&", parameters.Select(s => string.Format("{0}={1}", s.Key, s.Value)));
                         var url = $"{path}?{queryString}";
                         var response = await client.GetAsync(url).ConfigureAwait(false);
@@ -51,12 +53,13 @@ namespace my.race.connect {
 
                         #pragma warning disable CS8602 // null cast
                         #pragma warning disable CS8604 // null cast
+
                         if (apiResult == null || apiResult.response  == null || apiResult.response.body == null ||
                             apiResult.response.body.totalCount.HasValue == false)
                         {
                             break;
                         }
-                        else if (apiResult.response.body.items != null && apiResult.response.body.items.HasValue &&
+                        else if (/*apiResult.response.body.items != null && apiResult.response.body.items.HasValue &&*/
                                 apiResult.response.body.items.GetType() == typeof(System.Text.Json.JsonElement))
                         {                            
                             var items = (apiResult.response.body.items as System.Text.Json.JsonElement?);
@@ -79,6 +82,9 @@ namespace my.race.connect {
                         {
                             break;
                         }
+
+                        _logger.LogInformation(queryString);
+                        _logger.LogInformation(result.Count.ToString());
 
                         pageNo = pageNo + 1;
                     }
