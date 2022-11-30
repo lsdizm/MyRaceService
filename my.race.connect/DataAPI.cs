@@ -104,6 +104,12 @@ namespace my.race.connect
             return null;
         }
 
+        public async Task<dynamic> GetDataTest(string url)
+        {
+            var result = await GetFromAPI<dynamic>(url, new Dictionary<string, string>()).ConfigureAwait(false);
+            return result;
+        }
+
         public async Task<List<RaceApi>> GetRaceResultDetail(DateTime fromDate, DateTime toDate)
         {
             var parameters = new Dictionary<string, string>();

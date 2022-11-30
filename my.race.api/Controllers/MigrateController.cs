@@ -106,4 +106,11 @@ public class MigrateController : ControllerBase
         //var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
         return Ok(true);
     }
+
+    [HttpGet("data-test")]
+    public async Task<IActionResult> GetDataTest([FromQuery]string keyword)
+    {
+        var result = await _dataapi.GetDataTest(keyword).ConfigureAwait(false);
+        return Ok(result);
+    }
 }
