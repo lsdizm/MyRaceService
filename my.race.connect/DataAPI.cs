@@ -1,7 +1,8 @@
 using System.Web;
 using System.Dynamic;
 using System.Net.Http.Headers;
-using System.Text.Json;
+//using System.Text.Json;
+using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using my.race.model;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,15 @@ namespace my.race.connect
 {
     public class DataAPI : IDataAPI
     {
-        private readonly ILogger<DataAPI> _logger;
-        private const string serviceKey = "gKTNtNTmRwLKq8JD1zkpfaggw28u5FJ%2F%2BCZ3PpQxX15sOjBrSoWWMf2oSe3dG%2BJqsIcXim5EW5xlTx1jxGqKgA%3D%3D";
-        public DataAPI(ILogger<DataAPI> logger)
+        private readonly ILogger<DataAPI>? _logger;
+        private readonly string serviceKey = "gKTNtNTmRwLKq8JD1zkpfaggw28u5FJ%2F%2BCZ3PpQxX15sOjBrSoWWMf2oSe3dG%2BJqsIcXim5EW5xlTx1jxGqKgA%3D%3D";
+
+        public DataAPI()
+        {
+
+        }
+        
+        public DataAPI(ILogger<DataAPI> logger) : this()
         {
             _logger = logger;
         }
@@ -31,10 +38,11 @@ namespace my.race.connect
         {
             var result = new List<T>();
             var pageNo = 1;
-            var numOfRows = 100;
+            var numOfRows = 500;
             parameters.TryAdd("pageNo", pageNo.ToString());
             parameters.TryAdd("numOfRows", numOfRows.ToString());
             parameters.TryAdd("serviceKey", serviceKey);
+            parameters.TryAdd("_type", "json");
 
             using (var client = GetHttpClient())
             {
@@ -49,7 +57,8 @@ namespace my.race.connect
                         var response = await client.GetAsync(url).ConfigureAwait(false);
                         response.EnsureSuccessStatusCode();
                         var responseString = await response.Content.ReadAsStringAsync();                
-                        var apiResult = JsonSerializer.Deserialize<ApiResult>(responseString);
+                        //var apiResult = JsonSerializer.Deserialize<ApiResult>(responseString);
+                        var apiResult = JsonConvert.DeserializeObject<ApiResult>(responseString);
 
                         #pragma warning disable CS8602 // null cast
                         #pragma warning disable CS8604 // null cast
@@ -59,38 +68,62 @@ namespace my.race.connect
                         {
                             break;
                         }
-                        else if (/*apiResult.response.body.items != null && apiResult.response.body.items.HasValue &&*/
-                                apiResult.response.body.items.GetType() == typeof(System.Text.Json.JsonElement))
-                        {                            
-                            var items = (apiResult.response.body.items as System.Text.Json.JsonElement?);
-                            var itemsJsonString = JsonSerializer.Serialize(items);
-                            if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"") 
-                            {
-                                var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
-                                modelResult.TryGetProperty("item", out var modelResultProperty);                                        
-                                var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
-                                if (modelResultPropertyValue != null) 
-                                {
-                                    result.AddRange((modelResultPropertyValue as List<T>));
-                                }
-                            }
+                        else if (apiResult.response.body.items != null && 
+                            apiResult.response.body.items.item != null &&
+                            apiResult.response.body.items.item.Any())
+                        {
+                            result.AddRange((apiResult.response.body.items.item as List<T>));
+
+                            //var items = apiResult.response.body.items.item;
+                            //var itemsJsonString = JsonSerializer.Serialize(items);
+                            //if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"")
+                            //{
+                            //    var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
+                            //    modelResult.TryGetProperty("item", out var modelResultProperty);
+                            //    var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
+                            //    if (modelResultPropertyValue != null)
+                            //    {
+                            //        result.AddRange((modelResultPropertyValue as List<T>));
+                            //    }
+                            //}
                         }
-                        #pragma warning restore CS8604 // null cast
-                        #pragma warning restore CS8602 // null cast
+                        //else if (apiResult.response.body.items.GetType() == typeof(System.Text.Json.JsonElement))
+                        //{                            
+                        //    var items = (apiResult.response.body.items as System.Text.Json.JsonElement?);
+                        //    var itemsJsonString = JsonSerializer.Serialize(items);
+                        //    if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"") 
+                        //    {
+                        //        var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
+                        //        modelResult.TryGetProperty("item", out var modelResultProperty);                                        
+                        //        var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
+                        //        if (modelResultPropertyValue != null) 
+                        //        {
+                        //            result.AddRange((modelResultPropertyValue as List<T>));
+                        //        }
+                        //    }
+                        //}
+#pragma warning restore CS8604 // null cast
+#pragma warning restore CS8602 // null cast
 
                         if (apiResult.response.body.totalCount < (pageNo * numOfRows))
                         {
                             break;
                         }
 
-                        _logger.LogInformation(queryString);
-                        _logger.LogInformation(result.Count.ToString());
+                        if (_logger != null) 
+                        { 
+                            _logger.LogInformation(queryString);
+                            _logger.LogInformation(result.Count.ToString());
+                        }
 
                         pageNo = pageNo + 1;
                     }
                     catch (Exception ex)
-                    {                    
-                        _logger.LogInformation(ex.ToString());
+                    {
+                        if (_logger != null)
+                        {
+                            _logger.LogInformation(ex.ToString());
+                        }
                         break;
                     }
                 }

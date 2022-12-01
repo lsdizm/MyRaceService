@@ -11,11 +11,10 @@ namespace my.race.connect
     public class Configurations : IConfigurations
     {
         private readonly List<MyRaceEnvironment> _myRaceEnvironment;
-        private readonly ILogger<DataAPI> _logger;
+        private readonly ILogger<DataAPI>? _logger;
 
-        public Configurations(ILogger<DataAPI> logger) 
+        public Configurations()
         {
-            _logger = logger;
             _myRaceEnvironment = new List<MyRaceEnvironment>();
 
             using (var connection = connect()) 
@@ -23,7 +22,12 @@ namespace my.race.connect
                 connection.Open();
                 var sqlContent = $"select * from MyRaceEnvironment";
                 _myRaceEnvironment = Dapper.SqlMapper.Query<MyRaceEnvironment>(connection, sqlContent).ToList();
-            }   
+            }
+        }
+
+        public Configurations(ILogger<DataAPI> logger) : this()
+        {
+            _logger = logger;
         }
 
         public List<MyRaceEnvironment> GetMyRaceEnvironment(string itemCode)

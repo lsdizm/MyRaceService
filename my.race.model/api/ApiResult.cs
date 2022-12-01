@@ -18,9 +18,14 @@ namespace my.race.model {
 
     public class Body
     {
-        public dynamic? items { get; set; }
+        public Items? items { get; set; }
         public int? numOfRows { get; set; }
         public int? pageNo { get; set; }
         public int? totalCount { get; set; }
+    }
+
+    public class Items
+    {
+        public List<object>? item { get; set; }
     }
 }
