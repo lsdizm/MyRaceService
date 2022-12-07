@@ -80,6 +80,96 @@ namespace my.race.connect {
             }   
         }
 
+        public async Task<List<RaceResult>> UpdateRaceResult(List<RaceResult> raceResult)
+        {
+            if (raceResult != null && raceResult.Any())
+            {
+                var dateList = raceResult.Select(s => s.rcDate).Distinct();
+                var queryParameter = " in ('" + string.Join("','", dateList) + "')";
+                var sql = "delete from RaceResult where rcDate " + queryParameter + ";";
+                sql += "insert into RaceResult (chaksun, diffTot, divide, hrName, hrno, jkName, jkNo, meet, noracefl, prow, prowName, prtr, prtrName, rankKind, rc10dusu, rcAge, rcBudam, rcChul, rcCode, rcDate, rcDiff2, rcDiff3, rcDiff4, rcDiff5, rcDist, rcFrflag, rcGrade, rcHrfor, rcHrnew, rcNo, rcNrace, rcOrd, rcP1Odd, rcP2Odd, rcP3Odd, rcP4Odd, rcP5Odd, rcP6Odd, rcP8Odd, rcPlansu, rcRank, rcSex, rcSpcbu, rcTime, rcVtdusu, rundayth, track, weath, wgHr) values ";
+
+                sql += string.Join(",", raceResult.Select(item => "('" + string.Join("','", new object[]
+                    {
+                        item.chaksun,
+                        item.diffTot,
+                        item.divide,
+                        item.hrName,
+                        item.hrno,
+                        item.jkName,
+                        item.jkNo,
+                        item.meet,
+                        item.noracefl,
+                        item.prow,
+                        item.prowName,
+                        item.prtr,
+                        item.prtrName,
+                        item.rankKind,
+                        item.rc10dusu,
+                        item.rcAge,
+                        item.rcBudam,
+                        item.rcChul,
+                        item.rcCode,
+                        item.rcDate,
+                        item.rcDiff2,
+                        item.rcDiff3,
+                        item.rcDiff4,
+                        item.rcDiff5,
+                        item.rcDist,
+                        item.rcFrflag,
+                        item.rcGrade,
+                        item.rcHrfor,
+                        item.rcHrnew,
+                        item.rcNo,
+                        item.rcNrace,
+                        item.rcOrd,
+                        item.rcP1Odd,
+                        item.rcP2Odd,
+                        item.rcP3Odd,
+                        item.rcP4Odd,
+                        item.rcP5Odd,
+                        item.rcP6Odd,
+                        item.rcP8Odd,
+                        item.rcPlansu,
+                        item.rcRank,
+                        item.rcSex,
+                        item.rcSpcbu,
+                        item.rcTime,
+                        item.rcVtdusu,
+                        item.rundayth,
+                        item.track,
+                        item.weath,
+                        item.wgHr
+                    }) + "')"));
+                
+                
+                using (var connection = Connect())
+                {
+                    var command = new MySql.Data.MySqlClient.MySqlCommand(sql, connection);
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    await connection.CloseAsync().ConfigureAwait(false);
+                }
+            }
+            // 기존 내역 삭제후 새로 입력
+
+            //var sql = $"insert into API_LOG (ID, TITLE, DATETIME, LOG_CONTENTS) values ('{Guid.NewGuid().ToString()}', '{title}', '{dateTime.ToString("yyyy-MM-dd HH:mm:ss")}', '{logContent}');";
+            //var command = new MySql.Data.MySqlClient.MySqlCommand(sql, connection);
+            //var result = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+            //return result;
+            return raceResult;
+        }
+
+
+
+
+
+
+
+
+
+
+
         public async Task<int> SaveLog(MySql.Data.MySqlClient.MySqlConnection connection, string title, DateTime dateTime, string logContent)
         {
             var sql = $"insert into API_LOG (ID, TITLE, DATETIME, LOG_CONTENTS) values ('{Guid.NewGuid().ToString()}', '{title}', '{dateTime.ToString("yyyy-MM-dd HH:mm:ss")}', '{logContent}');";                    

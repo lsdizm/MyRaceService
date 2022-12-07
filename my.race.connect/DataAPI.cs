@@ -36,7 +36,7 @@ namespace my.race.connect
 
         public async Task<List<T>> GetFromAPI<T>(string path, Dictionary<string, string> parameters) where T : class
         {
-            var result = new List<T>();
+            var aTypeResult = new List<dynamic>();
             var pageNo = 1;
             var numOfRows = 500;
             parameters.TryAdd("pageNo", pageNo.ToString());
@@ -59,10 +59,7 @@ namespace my.race.connect
                         var responseString = await response.Content.ReadAsStringAsync();                
                         //var apiResult = JsonSerializer.Deserialize<ApiResult>(responseString);
                         var apiResult = JsonConvert.DeserializeObject<ApiResult>(responseString);
-
-                        #pragma warning disable CS8602 // null cast
-                        #pragma warning disable CS8604 // null cast
-
+                        
                         if (apiResult == null || apiResult.response  == null || apiResult.response.body == null ||
                             apiResult.response.body.totalCount.HasValue == false)
                         {
@@ -72,38 +69,8 @@ namespace my.race.connect
                             apiResult.response.body.items.item != null &&
                             apiResult.response.body.items.item.Any())
                         {
-                            result.AddRange((apiResult.response.body.items.item as List<T>));
-
-                            //var items = apiResult.response.body.items.item;
-                            //var itemsJsonString = JsonSerializer.Serialize(items);
-                            //if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"")
-                            //{
-                            //    var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
-                            //    modelResult.TryGetProperty("item", out var modelResultProperty);
-                            //    var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
-                            //    if (modelResultPropertyValue != null)
-                            //    {
-                            //        result.AddRange((modelResultPropertyValue as List<T>));
-                            //    }
-                            //}
+                            aTypeResult.AddRange(apiResult.response.body.items.item);
                         }
-                        //else if (apiResult.response.body.items.GetType() == typeof(System.Text.Json.JsonElement))
-                        //{                            
-                        //    var items = (apiResult.response.body.items as System.Text.Json.JsonElement?);
-                        //    var itemsJsonString = JsonSerializer.Serialize(items);
-                        //    if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"") 
-                        //    {
-                        //        var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
-                        //        modelResult.TryGetProperty("item", out var modelResultProperty);                                        
-                        //        var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
-                        //        if (modelResultPropertyValue != null) 
-                        //        {
-                        //            result.AddRange((modelResultPropertyValue as List<T>));
-                        //        }
-                        //    }
-                        //}
-#pragma warning restore CS8604 // null cast
-#pragma warning restore CS8602 // null cast
 
                         if (apiResult.response.body.totalCount < (pageNo * numOfRows))
                         {
@@ -113,7 +80,7 @@ namespace my.race.connect
                         if (_logger != null) 
                         { 
                             _logger.LogInformation(queryString);
-                            _logger.LogInformation(result.Count.ToString());
+                            _logger.LogInformation(aTypeResult.Count.ToString());
                         }
 
                         pageNo = pageNo + 1;
@@ -128,8 +95,35 @@ namespace my.race.connect
                     }
                 }
 
+            }
+
+            if (aTypeResult != null && aTypeResult.Any())
+            {
+                var result = new List<T>();
+                try
+                {
+                    foreach(var item in aTypeResult)
+                    {
+                        var sss = JsonConvert.SerializeObject(item);
+
+                        var converted = JsonConvert.DeserializeObject<T>(sss);
+                        if (converted != null)
+                        {
+                            result.Add(converted);
+                        }
+                    }
+                }
+                catch
+                {
+
+                }
                 return result;
             }
+            else
+            {
+                return new List<T>();
+            }
+
         }
 
         public async Task<List<RaceResultApi>> GetRaceResult(DateTime fromDate, DateTime toDate)
@@ -143,12 +137,12 @@ namespace my.race.connect
             return result;
         }
 
-        public async Task<List<RaceApi>> GetRaceResultDetail(DateTime fromDate, DateTime toDate)
+        public async Task<List<RaceResult>> GetRaceResultDetail(DateTime fromDate, DateTime toDate)
         {
             var parameters = new Dictionary<string, string>();
             parameters.Add("rc_date_fr", fromDate.ToString("yyyyMMdd"));
             parameters.Add("rc_date_to", toDate.ToString("yyyyMMdd"));
-            var result = await GetFromAPI<RaceApi>("B551015/API186/SeoulRace", parameters).ConfigureAwait(false);
+            var result = await GetFromAPI<RaceResult>("B551015/API186/SeoulRace", parameters).ConfigureAwait(false);
             return result;
         }
     
@@ -261,3 +255,35 @@ namespace my.race.connect
                 }
 
                 return result;*/
+
+
+/*
+ 
+ //var items = apiResult.response.body.items.item;
+                            //var itemsJsonString = JsonSerializer.Serialize(items);
+                            //if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"")
+                            //{
+                            //    var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
+                            //    modelResult.TryGetProperty("item", out var modelResultProperty);
+                            //    var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
+                            //    if (modelResultPropertyValue != null)
+                            //    {
+                            //        result.AddRange((modelResultPropertyValue as List<T>));
+                            //    }
+                            //}
+ //else if (apiResult.response.body.items.GetType() == typeof(System.Text.Json.JsonElement))
+                        //{                            
+                        //    var items = (apiResult.response.body.items as System.Text.Json.JsonElement?);
+                        //    var itemsJsonString = JsonSerializer.Serialize(items);
+                        //    if (!string.IsNullOrWhiteSpace(itemsJsonString) && itemsJsonString != "\"\"") 
+                        //    {
+                        //        var modelResult = JsonSerializer.Deserialize<JsonElement>(itemsJsonString);
+                        //        modelResult.TryGetProperty("item", out var modelResultProperty);                                        
+                        //        var modelResultPropertyValue = modelResultProperty.Deserialize(typeof(List<T>));
+                        //        if (modelResultPropertyValue != null) 
+                        //        {
+                        //            result.AddRange((modelResultPropertyValue as List<T>));
+                        //        }
+                        //    }
+                        //}
+ */

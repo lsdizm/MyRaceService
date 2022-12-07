@@ -11,6 +11,10 @@ namespace my.race.connect {
          Task<ApiInformation> SelectApiInformation(string id);
         Task<List<T>> SelectAsync<T>(string sqlId, object jsonParameters);
 
+
+        Task<List<RaceResult>> UpdateRaceResult(List<RaceResult> raceResult);
+
+
         Task<int> SaveLog(MySql.Data.MySqlClient.MySqlConnection connection, string title, DateTime dateTime, string logContent);
     }
 }

@@ -8,6 +8,7 @@ namespace my.race.api.Controllers;
 [Route("migrate")]
 public class MigrateController : ControllerBase
 {
+    private readonly IDataService _service;
     private readonly IDataBases _databases;
     private readonly IDataAPI _dataapi;
     private readonly IConfigurations _configurations;
@@ -15,9 +16,11 @@ public class MigrateController : ControllerBase
     public MigrateController(IDataBases databases,
         IDataAPI dataapi,
         IConfigurations configurations,
+        IDataService service,
         ILogger<QueryController> logger)
     {
         _configurations = configurations;
+        _service = service;
         _databases = databases;
         _dataapi = dataapi;
         _logger = logger;
@@ -75,28 +78,8 @@ public class MigrateController : ControllerBase
             toDate = fromDate;
         }
 
-        var result = await _dataapi.GetRaceResult(fromDate.Value, toDate.Value).ConfigureAwait(false);
-
-         if (result.Any()) 
-        {
-            using (var connection = _databases.Connect()) 
-            {
-                await connection.OpenAsync().ConfigureAwait(false);
-
-                // foreach (var item in result) 
-                // {
-                //     var sql = $"insert into HORSE_RESULT (age,chulYn,hrName,hrNo,jun,meet,"+
-                //                                         "minRcDate,nameSp,prdCty,prizeYear,prizetsum," +
-                //                                         "rank,rating1,rating2,rating3,rating4," +
-                //                                         "sex,spTerm,stDate) values " + 
-                //                 $"('{item.age}', '{item.chulYn}', '{item.hrName}', '{item.hrNo}', '{item.jun}', '{item.meet}', " +
-                //                 $"'{item.minRcDate}', '{item.nameSp}', '{item.prdCty}', '{item.prizeYear}', '{item.prizetsum}', "+ 
-                //                 $"'{item.rank}', '{item.rating1}', '{item.rating2}', '{item.rating3}', '{item.rating4}'," +
-                //                 $"'{item.sex}', '{item.spTerm}', '{item.stDate}');";
-                //     await _databases.ExecuteAsync(sql, connection).ConfigureAwait(false);
-                // }
-            }   
-        }
+        var result = await _service.GetRaceResultDetail(fromDate.Value, toDate.Value).ConfigureAwait(false);
+        
         return Ok(result);
     }
 
