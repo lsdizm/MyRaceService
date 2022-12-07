@@ -3,7 +3,7 @@ Description="myraceservice"
 
 [Service]
 WorkingDirectory=/home/opc/myraceservice.publish
-ExecStart=/usr/bin/dotnet /home/opc/MyRaceService/publish/my.race.service.dll
+ExecStart=/usr/bin/dotnet /home/opc/MyRaceService/publish/my.race.api.dll
 Restart=always
 # Restart service after 10 seconds if the dotnet service crashes:
 RestartSec=10
