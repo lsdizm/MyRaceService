@@ -9,6 +9,6 @@ namespace my.race.connect
 {
     public interface IDataService
     {
-        Task<List<RaceResult>> GetRaceResultDetail(DateTime fromDate, DateTime toDate);
+        Task<List<RaceResult>> GetRaceResultDetail(DateTime fromDate, DateTime toDate, bool overwrite);
     }
 }

@@ -78,7 +78,7 @@ public class MigrateController : ControllerBase
             toDate = fromDate;
         }
 
-        var result = await _service.GetRaceResultDetail(fromDate.Value, toDate.Value).ConfigureAwait(false);
+        var result = await _service.GetRaceResultDetail(fromDate.Value, toDate.Value, true).ConfigureAwait(false);
         
         return Ok(result);
     }

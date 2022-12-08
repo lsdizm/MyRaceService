@@ -18,32 +18,32 @@ namespace my.race.connect
             _bases = bases;
         }
 
-        public async Task<List<RaceResult>> GetRaceResultDetail(DateTime fromDate, DateTime toDate)
+        public async Task<List<RaceResult>> GetRaceResultDetail(DateTime fromDate, DateTime toDate, bool overwrite)
         {
+            var result = new List<RaceResult>();
             var parameters = new Dictionary<string, string>();
-            parameters.Add("rc_date_fr", fromDate.ToString("yyyyMMdd"));
-            parameters.Add("rc_date_to", toDate.ToString("yyyyMMdd"));
             var apiInformation = await _bases.SelectApiInformation("RaceResult").ConfigureAwait(false);
 
             if (apiInformation != null) 
             { 
-                var apiResult = await _api.GetFromAPI<RaceResult>(apiInformation.UrlAddress, parameters).ConfigureAwait(false);
+                var date = fromDate.Date;
+                parameters.Add("rc_date_fr", date.ToString("yyyyMMdd"));
+                parameters.Add("rc_date_to", date.ToString("yyyyMMdd"));
 
-                if (apiResult != null && apiResult.Any())
+                while (date <= toDate)
                 {
-                    var result = await _bases.UpdateRaceResult(apiResult).ConfigureAwait(false);
-                    return result;
-                }
-                else
-                {
-                    return null;
+                    parameters["rc_date_fr"] = date.ToString("yyyyMMdd");
+                    parameters["rc_date_to"] = date.ToString("yyyyMMdd");
+                    var apiResult = await _api.GetFromAPI<RaceResult>(apiInformation.UrlAddress, parameters).ConfigureAwait(false);
+
+                    if (apiResult != null && apiResult.Any())
+                    {
+                        var dbUpdateResult = await _bases.UpdateRaceResult(apiResult).ConfigureAwait(false);
+                        result.AddRange(apiResult);
+                    }
                 }
             }
-            else
-            {
-                return null;
-            }
-            
+            return result;
         }
 
     }
