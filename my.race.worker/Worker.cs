@@ -23,9 +23,13 @@ public class Worker : BackgroundService
 
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             var today = DateTime.Now.Date;
-            if (_lastUpdateDateTime == null || _lastUpdateDateTime.Date < today)
+            if (_lastUpdateDateTime.Date < today)
             {
                 var result = await _service.GetRaceResultDetail(today.AddDays(-14), today, false).ConfigureAwait(false);
+                if (result != null && result.Any())
+                {
+                    _logger.LogInformation("Update: ", result.Count());
+                }
                 _lastUpdateDateTime = today;
                 // call
             }

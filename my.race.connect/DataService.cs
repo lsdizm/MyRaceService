@@ -41,6 +41,7 @@ namespace my.race.connect
                         var dbUpdateResult = await _bases.UpdateRaceResult(apiResult).ConfigureAwait(false);
                         result.AddRange(apiResult);
                     }
+                    date = date.AddDays(1);
                 }
             }
             return result;
