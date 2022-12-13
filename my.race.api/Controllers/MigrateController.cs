@@ -41,6 +41,9 @@ public class MigrateController : ControllerBase
     [HttpGet("data-api-test")]
     public async Task<IActionResult> TestApi([FromQuery]string id, [FromQuery] List<string> parameters)
     {
+        // var result = await GetFromAPI<RaceResult>("B551015/API186/SeoulRace", parameters).ConfigureAwait(false);
+        // var result = await GetFromAPI<HorseApi>("B551015/racehorselist/getracehorselist", parameters).ConfigureAwait(false);
+            
         var result = await _databases.SelectApiInformation(id).ConfigureAwait(false);
         
         if (result != null)
@@ -54,8 +57,6 @@ public class MigrateController : ControllerBase
         {
             return BadRequest();
         }
-
-
     }
 
     [HttpGet("configurations")]
@@ -88,12 +89,5 @@ public class MigrateController : ControllerBase
     {
         //var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
         return Ok(true);
-    }
-
-    [HttpGet("data-test")]
-    public async Task<IActionResult> GetDataTest([FromQuery]string keyword)
-    {
-        var result = await _dataapi.GetDataTest(keyword).ConfigureAwait(false);
-        return Ok(result);
     }
 }

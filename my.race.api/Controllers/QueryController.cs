@@ -34,51 +34,44 @@ public class QueryController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("apis/race-result")]
-    public async Task<IActionResult> GetRaceResult([FromQuery]DateTime fromDate, [FromQuery]DateTime toDate)
-    {
-        var result = await _dataapi.GetRaceResult(fromDate, toDate).ConfigureAwait(false);
-        return Ok(result);
-    }
+    // [HttpGet("apis/horse-result")]
+    // public async Task<IActionResult> GetHorseResult([FromQuery]string meet, [FromQuery] string rank)
+    // {
+    //     var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
+    //     return Ok(result);
+    // }
 
-    [HttpGet("apis/horse-result")]
-    public async Task<IActionResult> GetHorseResult([FromQuery]string meet, [FromQuery] string rank)
-    {
-        var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
-        return Ok(result);
-    }
+    // [HttpPut("migrate/update-horse")]
+    // public async Task<IActionResult> UpdateHorse()
+    // {
+    //     var meet = "1";
+    //     var rankList = new List<string>(){"외1","외2","외3","외4","국1","국2","국3","국4","국5","국6","국미검","외미검"};
 
-    [HttpPut("migrate/update-horse")]
-    public async Task<IActionResult> UpdateHorse()
-    {
-        var meet = "1";
-        var rankList = new List<string>(){"외1","외2","외3","외4","국1","국2","국3","국4","국5","국6","국미검","외미검"};
+    //     foreach (var rank in rankList){
+    //         var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
 
-        foreach (var rank in rankList){
-            var result = await _dataapi.GetHorceResult(meet, rank).ConfigureAwait(false);
+    //         if (result.Any()) 
+    //         {
+    //             using (var connection = _databases.Connect()) 
+    //             {
+    //                 await connection.OpenAsync().ConfigureAwait(false);
 
-            if (result.Any()) 
-            {
-                using (var connection = _databases.Connect()) 
-                {
-                    await connection.OpenAsync().ConfigureAwait(false);
-
-                    foreach (var item in result) 
-                    {
-                        var sql = $"insert into HORSE_RESULT (age,chulYn,hrName,hrNo,jun,meet,"+
-                                                            "minRcDate,nameSp,prdCty,prizeYear,prizetsum," +
-                                                            "rank,rating1,rating2,rating3,rating4," +
-                                                            "sex,spTerm,stDate) values " + 
-                                    $"('{item.age}', '{item.chulYn}', '{item.hrName}', '{item.hrNo}', '{item.jun}', '{item.meet}', " +
-                                    $"'{item.minRcDate}', '{item.nameSp}', '{item.prdCty}', '{item.prizeYear}', '{item.prizetsum}', "+ 
-                                    $"'{item.rank}', '{item.rating1}', '{item.rating2}', '{item.rating3}', '{item.rating4}'," +
-                                    $"'{item.sex}', '{item.spTerm}', '{item.stDate}');";
-                        await _databases.ExecuteAsync(sql, connection).ConfigureAwait(false);
-                    }
-                }   
-            }
-        }
+    //                 foreach (var item in result) 
+    //                 {
+    //                     var sql = $"insert into HORSE_RESULT (age,chulYn,hrName,hrNo,jun,meet,"+
+    //                                                         "minRcDate,nameSp,prdCty,prizeYear,prizetsum," +
+    //                                                         "rank,rating1,rating2,rating3,rating4," +
+    //                                                         "sex,spTerm,stDate) values " + 
+    //                                 $"('{item.age}', '{item.chulYn}', '{item.hrName}', '{item.hrNo}', '{item.jun}', '{item.meet}', " +
+    //                                 $"'{item.minRcDate}', '{item.nameSp}', '{item.prdCty}', '{item.prizeYear}', '{item.prizetsum}', "+ 
+    //                                 $"'{item.rank}', '{item.rating1}', '{item.rating2}', '{item.rating3}', '{item.rating4}'," +
+    //                                 $"'{item.sex}', '{item.spTerm}', '{item.stDate}');";
+    //                     await _databases.ExecuteAsync(sql, connection).ConfigureAwait(false);
+    //                 }
+    //             }   
+    //         }
+    //     }
         
-        return Ok(true);
-    }
+    //     return Ok(true);
+    // }
 }
