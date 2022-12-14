@@ -24,8 +24,8 @@ public class SystemController : ControllerBase
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "/bin/bash",
-                Arguments = "sudo sh /home/opc/MyRaceService/myrace.h",
+                FileName = "/bin/sh",
+                Arguments = "/home/opc/MyRaceService/myrace.h",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
