@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using my.race.connect;
 
 namespace my.race.worker;
@@ -18,9 +19,11 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // worker 로드시에 api 서비스 리로드
+        this.UpdateApiService();
+
         while (!stoppingToken.IsCancellationRequested)
         {
-
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             var today = DateTime.Now.Date;
             if (_lastUpdateDateTime.Date < today)
@@ -36,6 +39,40 @@ public class Worker : BackgroundService
 
             // 1시간단위
             await Task.Delay((1000*60*60), stoppingToken);
+        }
+    }
+
+    private void UpdateApiService()
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "/bin/sh",
+                Arguments = "/home/opc/MyRaceService/myraceservice.h",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+            };
+
+            Process proc = new Process() { StartInfo = psi, };
+            proc.Start();
+            string result = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                var resultExit = proc.ExitCode.ToString();
+                _logger.LogInformation(resultExit);                
+
+            }
+            _logger.LogInformation(result);
+        }
+        catch (Exception ex) 
+        {
+            _logger.LogCritical(ex.ToString());
         }
     }
 }

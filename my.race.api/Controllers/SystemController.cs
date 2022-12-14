@@ -17,7 +17,8 @@ public class SystemController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPut("upgrade")]
+    /// worker start 
+    [HttpPut("worker-upgrade")]
     public IActionResult Upgrade()
     {
         try
@@ -25,7 +26,7 @@ public class SystemController : ControllerBase
             var psi = new ProcessStartInfo
             {
                 FileName = "/bin/sh",
-                Arguments = "/home/opc/MyRaceService/myrace.h",
+                Arguments = "/home/opc/MyRaceService/myraceworker.h",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
