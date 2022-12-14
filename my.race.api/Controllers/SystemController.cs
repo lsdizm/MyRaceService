@@ -18,7 +18,7 @@ public class SystemController : ControllerBase
     }
 
     [HttpPut("upgrade")]
-    public async Task<IActionResult> Upgrade()
+    public IActionResult Upgrade()
     {
         try
         {
@@ -51,5 +51,11 @@ public class SystemController : ControllerBase
             _logger.LogCritical(ex.ToString());
             return BadRequest();
         }
+    }
+
+    [HttpPut("test")]
+    public IActionResult Test()
+    {
+       return Ok("2022-12-14-버전체크");
     }
 }
