@@ -56,6 +56,6 @@ public class SystemController : ControllerBase
     [HttpPut("test")]
     public IActionResult Test()
     {
-       return Ok("2022-12-14-버전체크 01");
+       return Ok("2022-12-14-버전체크 02");
     }
 }
