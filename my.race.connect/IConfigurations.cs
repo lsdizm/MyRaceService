@@ -6,5 +6,6 @@ namespace my.race.connect
     {
         List<MyRaceEnvironment> GetMyRaceEnvironment(string itemCode);
         Task<MyRaceEnvironment> GetEnvironment();
+        Task<string> SendMessage(string message);
     }
 }

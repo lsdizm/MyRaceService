@@ -9,7 +9,7 @@ namespace my.race.connect {
         Task<List<T>> SelectConfiguration<T>(string tableName);
         Task<List<string>> SelectAllSqls();
          Task<ApiInformation> SelectApiInformation(string id);
-        Task<List<T>> SelectAsync<T>(string sqlId, object jsonParameters);
+        Task<List<T>> SelectAsync<T>(string sqlId, Dictionary<string, string> parameters);
 
 
         Task<List<RaceResult>> UpdateRaceResult(List<RaceResult> raceResult);

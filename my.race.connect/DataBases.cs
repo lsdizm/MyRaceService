@@ -1,5 +1,6 @@
 using System;
 using System.Dynamic;
+using Dapper;
 using my.race.model;
 using Newtonsoft.Json;
 
@@ -58,10 +59,10 @@ namespace my.race.connect {
             }   
         }
 
-        public async Task<List<T>> SelectAsync<T>(string sqlId, object jsonParameters)
+        public async Task<List<T>> SelectAsync<T>(string sqlId, Dictionary<string, string> parameters)
         {
-            var convert = JsonConvert.SerializeObject(jsonParameters);            
-            var parameters = JsonConvert.DeserializeObject<object>(convert);            
+            //var convert = JsonConvert.SerializeObject(jsonParameters);            
+            //var parameters = JsonConvert.DeserializeObject<ExpandoObject>(convert);            
 
             using (var connection = Connect()) 
             {
@@ -69,8 +70,15 @@ namespace my.race.connect {
                 var sqlContent = $"select SQL_CONTENT from SQL_STORAGE where id = '{sqlId}'";
                 var sql = await Dapper.SqlMapper.QueryFirstAsync<string>(connection, sqlContent).ConfigureAwait(false);
 
-                if (!string.IsNullOrWhiteSpace(sql)) {
-                    var result = await Dapper.SqlMapper.QueryAsync<T>(connection, sql, parameters).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(sql)) 
+                {
+                    var dynamicParameters = new DynamicParameters();
+                    foreach(var item in parameters)
+                    {
+                        dynamicParameters.Add("@" + item.Key.Replace("@", ""), item.Value);
+                    }
+
+                    var result = await Dapper.SqlMapper.QueryAsync<T>(connection, sql, dynamicParameters).ConfigureAwait(false);
                     return result.ToList();
                 }
                 else 
@@ -79,7 +87,7 @@ namespace my.race.connect {
                 }
             }   
         }
-
+        
         public async Task<List<RaceResult>> UpdateRaceResult(List<RaceResult> raceResult)
         {
             if (raceResult != null && raceResult.Any())

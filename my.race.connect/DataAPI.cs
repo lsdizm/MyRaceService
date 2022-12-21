@@ -12,16 +12,16 @@ namespace my.race.connect
     public class DataAPI : IDataAPI
     {
         private readonly ILogger<DataAPI>? _logger;
-        private const string serviceKey = "gKTNtNTmRwLKq8JD1zkpfaggw28u5FJ%2F%2BCZ3PpQxX15sOjBrSoWWMf2oSe3dG%2BJqsIcXim5EW5xlTx1jxGqKgA%3D%3D";
+        private readonly IConfigurations _configurations;
+        private readonly string serviceKey;
         private const string dataUrlAddress = "https://apis.data.go.kr/";
 
-        public DataAPI()
-        {
-        }
-        
-        public DataAPI(ILogger<DataAPI> logger) : this()
+        public DataAPI(ILogger<DataAPI>? logger, 
+            IConfigurations configurations)
         {
             _logger = logger;
+            _configurations = configurations;
+            serviceKey = _configurations.GetMyRaceEnvironment("API-SERVICE-KEY")?.FirstOrDefault()?.ItemValue ?? string.Empty;
         }
 
         private HttpClient GetHttpClient()
@@ -60,10 +60,33 @@ namespace my.race.connect
                         var responseString = await response.Content.ReadAsStringAsync();                
                         var apiResult = JsonConvert.DeserializeObject<ApiResult>(responseString);
                         
-                        if (apiResult == null || apiResult.response  == null || apiResult.response.body == null ||
+                        if (apiResult == null || 
+                            apiResult.response  == null ||                            
+                            apiResult.response.body == null ||                            
                             apiResult.response.body.totalCount.HasValue == false)
                         {
-                            break;
+                            var errorMessage = string.Empty;
+                            switch (apiResult?.response?.header?.resultCode)
+                            {
+                                case "1": errorMessage = "어플리케이션 에러 (1) :"; break;
+                                case "4": errorMessage = "HTTP 에러 (4) :"; break;
+                                case "12": errorMessage = "해당 오픈 API 서비스가 없거나 폐기됨 (12) :"; break;
+                                case "20": errorMessage = "서비스 접근거부 (20) :"; break;
+                                case "22": errorMessage = "서비스 요청제한횟수 초과에러 (22) :"; break;
+                                case "30":errorMessage = "등록되지 않은 서비스키 (30) :"; break;
+                                case "31": errorMessage = "활용기간 만료 (31) :"; break;
+                                case "32": errorMessage = "등록되지 않은 IP (32) :"; break;
+                                case "99": errorMessage = "기타에러 (99) :"; break;
+                                default:
+                                    break;
+                            }
+
+                            if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                throw new Exception(errorMessage + " [" + url + "] " + apiResult?.response?.header?.resultMsg);
+                            }
+
+                            //break;
                         }
                         else if (apiResult.response.body.items != null && 
                             apiResult.response.body.items.item != null &&
@@ -72,7 +95,7 @@ namespace my.race.connect
                             aTypeResult.AddRange(apiResult.response.body.items.item);
                         }
 
-                        if (apiResult.response.body.totalCount < (pageNo * numOfRows))
+                        if (apiResult?.response?.body?.totalCount < (pageNo * numOfRows))
                         {
                             break;
                         }
@@ -91,6 +114,7 @@ namespace my.race.connect
                         {
                             _logger.LogInformation(ex.ToString());
                         }
+                        await _configurations.SendMessage(ex.Message);
                         break;
                     }
                 }

@@ -51,5 +51,24 @@ namespace my.race.connect
             var _connectionString = "host=152.70.232.248;port=3306;user id=mj;password=!Dhfkzmffkdnem1;database=mj;";
             return new MySql.Data.MySqlClient.MySqlConnection(_connectionString);
         }
+
+        public async Task<string> SendMessage(string message)
+        {
+            var token = "5974273292:AAH_dQslxH-pj78N-PffAwkYoVmbnPtj3bM";
+            var chatId = "415767607";
+            var url = string.Format(@"https://api.telegram.org/bot{0}/sendMessage?chat_id={1}&text={2}", token, chatId, message);
+            var httpClient = new HttpClient();
+
+            try
+            {
+                var response = await httpClient.GetAsync(url).ConfigureAwait(false);
+                var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
+            }
+        }
     }
 }

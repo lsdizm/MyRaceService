@@ -28,9 +28,9 @@ public class QueryController : ControllerBase
     }
 
     [HttpPut("queries/{id}")]
-    public async Task<IActionResult> GetQuery(string id, [FromBody]object jsonParameter )
+    public async Task<IActionResult> GetQuery(string id, [FromBody] Dictionary<string, string> parameters)
     {
-        var result = await _databases.SelectAsync<dynamic>(id, jsonParameter).ConfigureAwait(false);
+        var result = await _databases.SelectAsync<dynamic>(id, parameters).ConfigureAwait(false);
         return Ok(result);
     }
 
