@@ -8,6 +8,7 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton<IDataService, DataService>();
         services.AddSingleton<IDataAPI, DataAPI>();
         services.AddSingleton<IDataBases, DataBases>();
+        services.AddSingleton<IConfigurations, Configurations>();
     })
     .Build();
 
