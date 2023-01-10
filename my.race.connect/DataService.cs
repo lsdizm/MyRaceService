@@ -36,35 +36,41 @@ namespace my.race.connect
 
                 while (date <= toDate)
                 {
-                    parameters["rc_date_fr"] = date.ToString("yyyyMMdd");
-                    parameters["rc_date_to"] = date.ToString("yyyyMMdd");
-
-                    // check exists 
-                    if (!overwrite)
+                    if (date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday)
                     {
-                        var extist = await _bases.SelectAsync<RaceResult>(
-                            "race-result-by-date", 
-                            new Dictionary<string, string>()
-                            {
-                                { "rcdate", date.ToString("yyyyMMdd")}
-                            }).ConfigureAwait(false);
+                        parameters["rc_date_fr"] = date.ToString("yyyyMMdd");
+                        parameters["rc_date_to"] = date.ToString("yyyyMMdd");
 
-                        if (extist != null && extist.Any())
+                        // check exists 
+                        if (!overwrite)
                         {
-                            date = date.AddDays(1);
-                            continue;
+                            var extist = await _bases.SelectAsync<RaceResult>(
+                                "race-result-by-date", 
+                                new Dictionary<string, string>()
+                                {
+                                    { "rcdate", date.ToString("yyyyMMdd")}
+                                }).ConfigureAwait(false);
+
+                            if (extist != null && extist.Any())
+                            {
+                                date = date.AddDays(1);
+                                continue;
+                            }
+                        }                    
+
+                        var apiResult = await _api.GetFromAPI<RaceResult>(apiInformation.UrlAddress, parameters).ConfigureAwait(false);
+
+                        if (apiResult != null && apiResult.Any())
+                        {
+                            var dbUpdateResult = await _bases.UpdateRaceResult(apiResult).ConfigureAwait(false);
+
+                            var message = string.Join("\n", apiResult.Where(w => w.rcOrd <= 3).OrderBy(o => o.rcNo).ThenBy(t => t.rcOrd).Select(s => string.Format("{0} : {1}.{2}", s.rcNo, s.rcOrd, s.hrName)).ToList());
+                            await _configurations.SendMessage("결과 업데이트 : " + date.ToString("yyyyMMdd") + "\n" + message).ConfigureAwait(false);
+                            
+                            result.AddRange(apiResult);
                         }
-                    }                    
+                    }    
 
-                    var apiResult = await _api.GetFromAPI<RaceResult>(apiInformation.UrlAddress, parameters).ConfigureAwait(false);
-
-                    if (apiResult != null && apiResult.Any())
-                    {
-                        var dbUpdateResult = await _bases.UpdateRaceResult(apiResult).ConfigureAwait(false);
-                        await _configurations.SendMessage("결과 업데이트 : " + date.ToString("yyyyMMdd")).ConfigureAwait(false);
-                        result.AddRange(apiResult);
-                    }
-                    
                     date = date.AddDays(1);
                 }
             }
